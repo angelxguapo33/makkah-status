@@ -13,23 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Set up Python 3.12
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      # الخطوة الجديدة والحاسمة: تثبيت محرك جافا سكريبت لحل ألغاز يوتيوب
-      - name: Install Node.js (JavaScript Runtime)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Install Dependencies
-        run: |
-          pip install -U yt-dlp google-genai opencv-python-headless
-
-      - name: Create Cookies
-        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
+        # تثبيت المكتبتين المطلوبتين فقط!
+        run: pip install google-genai opencv-python-headless
 
       - name: Run Bot
         env:
@@ -41,5 +32,5 @@ jobs:
           git config --global user.name "Makkah-Bot"
           git config --global user.email "bot@github.com"
           git add status.json
-          git commit -m "Fix JS Challenge" || exit 0
+          git commit -m "Direct Stream Update" || exit 0
           git push
