@@ -13,6 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Install FFmpeg
+        # هذه الخطوة لتثبيت البرنامج المفقود في السيرفر
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -31,5 +37,5 @@ jobs:
           git config --global user.name "Makkah-Bot"
           git config --global user.email "bot@github.com"
           git add status.json
-          git commit -m "FFmpeg Stream Update" || exit 0
+          git commit -m "Fix FFmpeg Installation" || exit 0
           git push
