@@ -2,8 +2,8 @@ name: Update Makkah Status
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # يعمل كل 15 دقيقة
-  workflow_dispatch: # يسمح لك بتشغيله يدوياً للتجربة
+    - cron: '*/15 * * * *' 
+  workflow_dispatch: 
 
 permissions:
   contents: write
@@ -22,6 +22,12 @@ jobs:
 
       - name: Install Dependencies
         run: pip install -r requirements.txt
+
+      - name: Create Cookies File
+        run: |
+          cat << 'EOF' > cookies.txt
+          ${{ secrets.YOUTUBE_COOKIES }}
+          EOF
 
       - name: Run Monitor Script
         env:
