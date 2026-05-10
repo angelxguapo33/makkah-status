@@ -12,14 +12,16 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
       
-      - name: Install Latest Dependencies
-        # هنا نقوم بتحديث المكتبة لأحدث إصدار لتجنب حظر يوتيوب
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
         run: |
-          pip install -U yt-dlp google-generativeai opencv-python-headless
+          # تثبيت أحدث المكتبات وحذف القديمة لتجنب التعارض
+          pip install -U yt-dlp google-genai opencv-python-headless
 
       - name: Create Cookies
         run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
@@ -34,5 +36,5 @@ jobs:
           git config --global user.name "Makkah-Bot"
           git config --global user.email "bot@github.com"
           git add status.json
-          git commit -m "Automated status update" || exit 0
+          git commit -m "Automated update - May 2026" || exit 0
           git push
