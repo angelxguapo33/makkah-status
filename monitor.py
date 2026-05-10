@@ -7,8 +7,8 @@ import google.generativeai as genai
 # جلب المفتاح السري من إعدادات GitHub
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# رابط البث المباشر لقناة القرآن الكريم (تم تصحيح هذا السطر)
-YOUTUBE_URL = "https://www.youtube.com/watch?v=fZvuHkHYaXk"
+# رابط البث المباشر للقناة
+YOUTUBE_URL = "https://www.youtube.com/channel/UCos52azQNBgW63_9uDJoPDA/live"
 
 def save_status(status_text):
     with open("status.json", "w", encoding="utf-8") as f:
@@ -19,14 +19,22 @@ def main():
         save_status("Error: No API Key")
         return
     
-    # 1. جلب مسار البث المباشر
-    ydl_opts = {'format': 'best', 'quiet': True}
+    # 1. جلب مسار البث المباشر (مع التمويه كمتصفح كروم على ويندوز)
+    ydl_opts = {
+        'format': 'best',
+        'quiet': True,
+        'nocheckcertificate': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        }
+    }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(YOUTUBE_URL, download=False)
             stream_url = info['url']
-    except Exception:
-        save_status("Error: YouTube Link")
+    except Exception as e:
+        # هنا سنحفظ رسالة الخطأ الحقيقية القادمة من يوتيوب لنعرفها بالضبط
+        save_status(f"YT Error: {str(e)[:50]}")
         return
 
     # 2. التقاط صورة من البث
@@ -38,8 +46,8 @@ def main():
             return
         cv2.imwrite("frame.jpg", frame)
         cap.release()
-    except Exception:
-        save_status("Error: OpenCV")
+    except Exception as e:
+        save_status(f"CV Error: {str(e)[:50]}")
         return
 
     # 3. تحليل الصورة بالذكاء الاصطناعي (Gemini)
@@ -67,8 +75,8 @@ def main():
             final_status = "Wait"
             
         save_status(final_status)
-    except Exception:
-        save_status("Error: AI Analysis")
+    except Exception as e:
+        save_status(f"AI Error: {str(e)[:50]}")
 
 if __name__ == "__main__":
     main()
