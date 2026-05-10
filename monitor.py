@@ -17,15 +17,11 @@ def main():
         save_status("Error: No API Key")
         return
     
-    # 1. التمويه الاحترافي: التنكر كتطبيق أندرويد لتجاوز حظر الروبوتات
+    # 1. استخدام ملف الكوكيز السري لكي يعتقد يوتيوب أنك من تطلب البث شخصياً
     ydl_opts = {
         'format': 'best',
         'quiet': True,
-        'extractor_args': {
-            'youtube': {
-                'client': ['android', 'mweb']
-            }
-        }
+        'cookiefile': 'cookies.txt'
     }
     
     try:
