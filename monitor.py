@@ -7,7 +7,7 @@ import google.generativeai as genai
 # جلب المفتاح السري من إعدادات GitHub
 API_KEY = os.environ.get("GEMINI_API_KEY")
 # رابط البث المباشر لقناة القرآن الكريم
-YOUTUBE_URL = "https://www.youtube.com/@SaudiQuranTv/live
+"https://www.youtube.com/channel/UCos52azQNBgW63_9uDJoPDA/live"
 
 def save_status(status_text):
     with open("status.json", "w", encoding="utf-8") as f:
