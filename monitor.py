@@ -4,10 +4,8 @@ import cv2
 import yt_dlp
 import google.generativeai as genai
 
-# جلب المفتاح السري من إعدادات GitHub
+# جلب المفتاح السري
 API_KEY = os.environ.get("GEMINI_API_KEY")
-
-# رابط البث المباشر للقناة
 YOUTUBE_URL = "https://www.youtube.com/channel/UCos52azQNBgW63_9uDJoPDA/live"
 
 def save_status(status_text):
@@ -19,21 +17,22 @@ def main():
         save_status("Error: No API Key")
         return
     
-    # 1. جلب مسار البث المباشر (مع التمويه كمتصفح كروم على ويندوز)
+    # 1. التمويه الاحترافي: التنكر كتطبيق أندرويد لتجاوز حظر الروبوتات
     ydl_opts = {
         'format': 'best',
         'quiet': True,
-        'nocheckcertificate': True,
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        'extractor_args': {
+            'youtube': {
+                'client': ['android', 'mweb']
+            }
         }
     }
+    
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(YOUTUBE_URL, download=False)
             stream_url = info['url']
     except Exception as e:
-        # هنا سنحفظ رسالة الخطأ الحقيقية القادمة من يوتيوب لنعرفها بالضبط
         save_status(f"YT Error: {str(e)[:50]}")
         return
 
@@ -50,7 +49,7 @@ def main():
         save_status(f"CV Error: {str(e)[:50]}")
         return
 
-    # 3. تحليل الصورة بالذكاء الاصطناعي (Gemini)
+    # 3. التحليل بالذكاء الاصطناعي
     try:
         genai.configure(api_key=API_KEY)
         model = genai.GenerativeModel('gemini-1.5-flash')
