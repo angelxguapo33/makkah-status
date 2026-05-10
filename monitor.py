@@ -2,46 +2,41 @@ import os
 import json
 import cv2
 import yt_dlp
-from google import genai # المكتبة الجديدة
+from google import genai
 from datetime import datetime
 
-# استلام المفتاح
 API_KEY = os.getenv("GEMINI_KEY")
 YOUTUBE_URL = "https://www.youtube.com/watch?v=fZvuHkHYaXk"
 
 def main():
-    print("--- بدء التحديث باستخدام تقنيات 2026 ---")
+    print("--- محاولة فك التشفير باستخدام محرك Node.js ---")
     try:
         if not API_KEY: raise Exception("Missing GEMINI_KEY")
 
-        # 1. إعداد العميل الجديد لجيمناي
         client = genai.Client(api_key=API_KEY)
         
-        # 2. جلب البث مع حل تحدي يوتيوب (n-challenge)
+        # إعدادات نظيفة تعتمد على الكوكيز وحل الجافا سكريبت
         ydl_opts = {
             'format': 'best',
             'quiet': True,
             'cookiefile': 'cookies.txt',
             'nocheckcertificate': True,
-            # إجبار السيرفر على محاكاة متصفح حقيقي جداً
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+            # تمت إزالة سطر الأندرويد الذي تسبب في التعارض
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            print("جاري فك تشفير رابط يوتيوب...")
+            print("جاري استخراج الرابط وتخطي اللغز...")
             info = ydl.extract_info(YOUTUBE_URL, download=False)
             stream_url = info['url']
         
-        # 3. سحب الصورة
         cap = cv2.VideoCapture(stream_url)
         ret, frame = cap.read()
-        if not ret: raise Exception("يوتيوب حظر الاتصال بالبث")
+        if not ret: raise Exception("تم تجاوز اللغز ولكن يوتيوب يرفض تسليم إطارات البث (حظر IP).")
         
         cv2.imwrite("frame.jpg", frame)
         cap.release()
 
-        # 4. تحليل الصورة (بالطريقة الجديدة)
         print("جاري التحليل...")
         with open("frame.jpg", "rb") as f:
             image_bytes = f.read()
@@ -53,7 +48,6 @@ def main():
         
         status_result = response.text.strip()
 
-        # 5. حفظ النتيجة
         data = {
             "status": status_result,
             "last_update": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -62,11 +56,10 @@ def main():
         with open("status.json", "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         
-        print(f"✅ تم بنجاح: {status_result}")
+        print(f"✅ تمت العملية بنجاح: {status_result}")
 
     except Exception as e:
         print(f"❌ خطأ فني: {str(e)}")
-        # إذا استمر الحظر، سنعرف فوراً في بلوجر
         with open("status.json", "w") as f:
             json.dump({"status": "YouTube Security Active", "last_update": str(datetime.now())}, f)
         exit(1)
