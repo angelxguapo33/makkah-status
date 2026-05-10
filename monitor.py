@@ -17,11 +17,19 @@ def main():
         save_status("Error: No API Key")
         return
     
-    # 1. استخدام ملف الكوكيز السري لكي يعتقد يوتيوب أنك من تطلب البث شخصياً
+    # 1. إعدادات جلب البث مع التمويه الاحترافي والكوكيز
     ydl_opts = {
         'format': 'best',
         'quiet': True,
-        'cookiefile': 'cookies.txt'
+        'no_warnings': True,
+        'cookiefile': 'cookies.txt',
+        'nocheckcertificate': True,
+        'headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+        }
     }
     
     try:
@@ -59,7 +67,6 @@ def main():
         response = model.generate_content([image_file, prompt])
         result = response.text.strip()
         
-        # التأكد من صحة النتيجة
         if "Heavy" in result:
             final_status = "Heavy"
         elif "Medium" in result:
