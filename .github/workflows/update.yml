@@ -18,9 +18,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      # الخطوة الجديدة والحاسمة: تثبيت محرك جافا سكريبت لحل ألغاز يوتيوب
+      - name: Install Node.js (JavaScript Runtime)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install Dependencies
         run: |
-          # تثبيت أحدث المكتبات وحذف القديمة لتجنب التعارض
           pip install -U yt-dlp google-genai opencv-python-headless
 
       - name: Create Cookies
@@ -36,5 +41,5 @@ jobs:
           git config --global user.name "Makkah-Bot"
           git config --global user.email "bot@github.com"
           git add status.json
-          git commit -m "Automated update - May 2026" || exit 0
+          git commit -m "Fix JS Challenge" || exit 0
           git push
