@@ -3,82 +3,57 @@ import json
 import cv2
 import yt_dlp
 import google.generativeai as genai
+import subprocess
+from datetime import datetime
 
-# جلب المفتاح السري
-API_KEY = os.environ.get("GEMINI_API_KEY")
-YOUTUBE_URL = "https://www.youtube.com/channel/UCos52azQNBgW63_9uDJoPDA/live"
-
-def save_status(status_text):
-    with open("status.json", "w", encoding="utf-8") as f:
-        json.dump({"status": status_text}, f, ensure_ascii=False)
+# --- إعداداتك الخاصة ---
+API_KEY = "AIzaSyCLjgTgokfmUu2qpNEJ2fYwLQE-5jnhzVU"
+REPO_PATH = r"C:\Users\Flores de primavera\Desktop\MakkahBot"
+YOUTUBE_URL = "https://www.youtube.com/watch?v=fZvuHkHYaXk"
 
 def main():
-    if not API_KEY:
-        save_status("Error: No API Key")
-        return
-    
-    # 1. إعدادات جلب البث مع التمويه الاحترافي والكوكيز
-    ydl_opts = {
-        'format': 'best',
-        'quiet': True,
-        'no_warnings': True,
-        'cookiefile': 'cookies.txt',
-        'nocheckcertificate': True,
-        'headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Connection': 'keep-alive',
-        }
-    }
-    
     try:
+        # 1. إعداد جوجل وتجربة الموديلات المتاحة
+        genai.configure(api_key=API_KEY)
+        
+        # كود ذكي لاختيار الموديل المتاح تلقائياً لتجنب خطأ 404
+        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+        model_name = 'models/gemini-1.5-flash' if 'models/gemini-1.5-flash' in available_models else available_models[0]
+        print(f"✅ استخدام موديل: {model_name}")
+        
+        model = genai.GenerativeModel(model_name)
+
+        # 2. جلب البث
+        print("🔄 جلب البث المباشر...")
+        ydl_opts = {'format': 'best', 'quiet': True, 'cookiefile': 'cookies.txt', 'nocheckcertificate': True}
+        
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(YOUTUBE_URL, download=False)
             stream_url = info['url']
-    except Exception as e:
-        save_status(f"YT Error: {str(e)[:50]}")
-        return
-
-    # 2. التقاط صورة من البث
-    try:
+        
         cap = cv2.VideoCapture(stream_url)
         ret, frame = cap.read()
-        if not ret:
-            save_status("Error: Capture Frame")
-            return
+        if not ret: raise Exception("فشل التقاط الصورة")
         cv2.imwrite("frame.jpg", frame)
         cap.release()
-    except Exception as e:
-        save_status(f"CV Error: {str(e)[:50]}")
-        return
 
-    # 3. التحليل بالذكاء الاصطناعي
-    try:
-        genai.configure(api_key=API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = """
-        Analyze this image of the Holy Mosque in Makkah. 
-        Classify the crowd density in the Mataf area into one of three levels only: 
-        Light, Medium, or Heavy. 
-        Respond with only ONE WORD in English.
-        """
-        image_file = genai.upload_file(path="frame.jpg")
-        response = model.generate_content([image_file, prompt])
-        result = response.text.strip()
+        # 3. التحليل
+        img = genai.upload_file(path="frame.jpg")
+        response = model.generate_content([img, "Crowd density in Makkah Mataf: Light, Medium, or Heavy? One word only."])
+        status = response.text.strip()
         
-        if "Heavy" in result:
-            final_status = "Heavy"
-        elif "Medium" in result:
-            final_status = "Medium"
-        elif "Light" in result:
-            final_status = "Light"
-        else:
-            final_status = "Wait"
-            
-        save_status(final_status)
+        # 4. الحفظ والرفع
+        res = {"status": status, "time": str(datetime.now())}
+        with open("status.json", "w") as f: json.dump(res, f)
+        
+        os.chdir(REPO_PATH)
+        subprocess.run(["git", "add", "status.json"], check=True)
+        subprocess.run(["git", "commit", "-m", "update"], check=True)
+        subprocess.run(["git", "push", "origin", "main"], check=True)
+        print(f"✅ نجحت العملية! الحالة: {status}")
+
     except Exception as e:
-        save_status(f"AI Error: {str(e)[:50]}")
+        print(f"❌ خطأ حقيقي: {e}")
 
 if __name__ == "__main__":
     main()
