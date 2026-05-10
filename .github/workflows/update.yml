@@ -1,43 +1,30 @@
-name: Update Makkah Status
-
+name: Makkah Bot Cloud
 on:
   schedule:
-    - cron: '*/15 * * * *' 
-  workflow_dispatch: 
-
-permissions:
-  contents: write
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 jobs:
-  run-bot:
+  run-task:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Create Cookies File
-        run: |
-          cat << 'EOF' > cookies.txt
-          ${{ secrets.YOUTUBE_COOKIES }}
-          EOF
-
-      - name: Run Monitor Script
+      - run: pip install -r requirements.txt
+      - name: Create Cookies
+        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
+      - name: Run Bot
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_KEY: ${{ secrets.GEMINI_KEY }}
         run: python monitor.py
-
-      - name: Push to Repository
+      - name: Push
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "Bot"
+          git config --global user.email "bot@github.com"
           git add status.json
-          git commit -m "Update status.json" || exit 0
+          git commit -m "Update" || exit 0
           git push
